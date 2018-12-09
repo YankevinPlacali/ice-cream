@@ -10,12 +10,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import model.Model;
 import view.View;
@@ -25,10 +35,10 @@ import view.View;
  */
 
 /**
- * @author kevin.tchagwo
+ * @author kevin.tchagwo, Viehmann Benjamin, Oeppert Luise, Allani Mohammed, Sandrine Müller
  *
  */
-public class Presenter {
+public class Presenter implements IPresenter {
 
     private View view;
     private Model model;
@@ -147,7 +157,7 @@ public class Presenter {
         } else {
             try {
                 File file = loadFileData();
-                //                updateFile(file, targetValue, ausgewhlteStation_value);
+                updateFile(file, targetValue, ausgewhlteStation_value);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -156,7 +166,7 @@ public class Presenter {
 
     }
 
-    public void loadDefaultTargetValue(JTextField target_value) {
+    public void loadTargetValue(JTextField target_value) {
         target_value.setText("42");
     }
 
@@ -173,57 +183,166 @@ public class Presenter {
                 varianz_value.setForeground(Color.RED);
             } else if (variance >= (targetValue - targetFunfProzent)) {
                 varianz_value.setForeground(Color.GREEN);
+            } else {
+                varianz_value.setForeground(Color.BLACK);
             }
         } else {
             message.showMessageDialog(null, "Bitte Station auswählen und Aktueller Wert eingeben", null, JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    public void setValueForDiagram(DefaultCategoryDataset valueDiagram, String varianz_value, String aktuellWert, String target) {
+        valueDiagram.setValue(Integer.parseInt(target), "Varianz Diagramm", "Target");
+        valueDiagram.setValue(Integer.parseInt(aktuellWert), "Varianz Diagramm", "Aktueller Wert");
+        valueDiagram.setValue(Integer.parseInt(varianz_value), "Varianz Diagramm", "Varianz");
+    }
 
+    /**
+     * @param mainView
+     * @param aktuellWert_value
+     * @param varianz_value
+     * @param target_value 
+     */
+    public void createVarianceDiagramm(JPanel mainView, JTextField aktuellWert_value, JTextField varianz_value, JTextField target_value) {
+        String categoryAxisLabel = "Target";
+        String valueAxisLabel = "Aktueller Wert";
+        DefaultCategoryDataset valueDiagram = new DefaultCategoryDataset();
+        setValueForDiagram(valueDiagram, varianz_value.getText(), aktuellWert_value.getText(), target_value.getText());
+        JFreeChart diagramm = ChartFactory.createLineChart("Varianz Diagramm", categoryAxisLabel, valueAxisLabel, valueDiagram);
+        CategoryPlot plot = diagramm.getCategoryPlot();
+        plot.setRangeGridlinePaint(Color.BLACK);
+        ChartFrame chartFrm = new ChartFrame("Varianz Diagramm", diagramm);
+        chartFrm.setVisible(true);
+        chartFrm.setSize(500, 500);
+        ChartPanel panelDiag = new ChartPanel(diagramm);
+        mainView.add(panelDiag);
+    }
+
+    public void addStationRandomly(DefaultListModel<String> listValues_auswertung) {
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                // task to run goes here
+                File randomFile = null;
+                try {
+                    randomFile = model.loadStationFileDataForRandom();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String[] randomStationen = loadRandomStationen(randomFile);
+                int rnd = new Random().nextInt(randomStationen.length);
+                Random randomno = new Random();
+                if ((randomno.nextInt() * randomno.nextInt()) % 2 == 0) {
+                    if (!listValues_auswertung.contains(randomStationen[rnd])) {
+                        listValues_auswertung.addElement(randomStationen[rnd]);
+                    }
+                } else {
+
+                }
+                System.out.println("Hello !!!");
+            }
+
+        };
+
+        Timer timer = new Timer();
+        long delay = 0;
+        long intevalPeriod = 5 * 1000;
+
+        // schedules the task to be run in an interval 
+        timer.scheduleAtFixedRate(task, delay, intevalPeriod);
+
+    }
+
+    public String[] loadRandomStationen(File randomFile) {
+        String[] stationen = null;
+        if (randomFile != null) {
+            List<String> dataStationen = new ArrayList<>();
+            BufferedReader br = null;
+            FileReader fr = null;
+            try {
+                //br = new BufferedReader(new FileReader(file));
+                fr = new FileReader(randomFile);
+                br = new BufferedReader(fr);
+
+                String sCurrentLine;
+
+                while ((sCurrentLine = br.readLine()) != null) {
+                    System.out.println(sCurrentLine);
+                    dataStationen.add(sCurrentLine);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (br != null)
+                        br.close();
+                    if (fr != null)
+                        fr.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            stationen = dataStationen.toArray(new String[dataStationen.size()]);
+        } else {
+            System.out.println("failed to start with the file - the file is null");
+            return null;
+        }
+        return stationen;
+    }
 
     //TODO should be checked
-    //    private void updateFile(File file, String targetValue, JTextField ausgewhlteStation_value) {
-    //        String[] stationen = null;
-    //        if (file != null) {
-    //            List<String> dataStationen = new ArrayList<>();
-    //            BufferedReader br = null;
-    //            FileReader fr = null;
-    //            FileWriter wr = null;
-    //            try {
-    //                //br = new BufferedReader(new FileReader(file));
-    //                fr = new FileReader(file);
-    //                br = new BufferedReader(fr);
-    //                wr = new FileWriter(file);
-    //
-    //                String sCurrentLine;
-    //
-    //                while ((sCurrentLine = br.readLine()) != null) {
-    //                    String stationId = ausgewhlteStation_value.getText();
-    //                    for (String station : dataStationen) {
-    //                        if (station.equals(stationId)) {
-    //                            station += " = " + targetValue;
-    //                            wr.write(station);
-    //                        }
-    //                    }
-    //                    dataStationen.add(sCurrentLine);
-    //                }
-    //            } catch (IOException e) {
-    //                e.printStackTrace();
-    //            } finally {
-    //                try {
-    //                    if (br != null)
-    //                        br.close();
-    //                    if (fr != null)
-    //                        fr.close();
-    //                } catch (IOException ex) {
-    //                    ex.printStackTrace();
-    //                }
-    //            }
-    //            stationen = dataStationen.toArray(new String[dataStationen.size()]);
-    //        } else {
-    //            System.out.println("failed to start with the file - the file is null");
-    //            return;
-    //        }
-    //    }
+    public void updateFile(File file, String targetValue, JTextField ausgewhlteStation_value) {
+        String[] stationen = null;
+        if (file != null) {
+            List<String> dataStationen = new ArrayList<>();
+            BufferedReader br = null;
+            FileReader fr = null;
+            try {
+                //br = new BufferedReader(new FileReader(file));
+                fr = new FileReader(file);
+                br = new BufferedReader(fr);
+
+                fr = new FileReader(file);
+                br = new BufferedReader(fr);
+
+                String sCurrentLine;
+
+                while ((sCurrentLine = br.readLine()) != null) {
+                    dataStationen.add(sCurrentLine);
+                }
+                String stationId = ausgewhlteStation_value.getText();
+                int i = 0;
+                for (String station : dataStationen) {
+                    if (station.equals(stationId)) {
+                        dataStationen.set(i, station + " " + targetValue);
+                        break;
+                    }
+                    i++;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (br != null)
+                        br.close();
+                    if (fr != null)
+                        fr.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
+            //            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            //            for(String)
+            //            writer.write(str);
+            //             
+            //            writer.close();
+            
+            stationen = dataStationen.toArray(new String[dataStationen.size()]);
+        } else {
+            System.out.println("failed to start with the file - the file is null");
+            return;
+        }
+    }
 
 }

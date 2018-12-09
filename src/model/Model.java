@@ -8,28 +8,31 @@ import java.io.IOException;
  */
 
 /**
- * @author kevin.tchagwo
+ * @author  kevin.tchagwo, Viehmann Benjamin, Oeppert Luise, Allani Mohammed, Sandrine Müller
  *
  */
-public class Model {
+public class Model implements IModel {
     //TODO to should be removed
-    private String password;
+    private File file;
 
     public Model() {
-        password = "password"; //just set a default password.
+        try {
+            file = loadStationFileData();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
-    public void setPassword(String pass) {
-        password = pass;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     public File loadStationFileData() throws IOException {
-        File file = new File("C:\\Users\\kevin.tchagwo\\eclipse-workspace\\MvpDemo\\testFile1.txt");
-        return file;
+        File list1 = new File("C:\\Users\\kevin.tchagwo\\eclipse-workspace\\MvpDemo\\testFile1.txt");
+        return list1;
+    }
+
+    public File loadStationFileDataForRandom() throws IOException {
+        File list2 = new File("C:\\Users\\kevin.tchagwo\\eclipse-workspace\\MvpDemo\\testFile2.txt");
+        return list2;
     }
 
 }

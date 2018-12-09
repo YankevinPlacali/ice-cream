@@ -19,16 +19,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import com.toedter.calendar.JDateChooser;
+
 import presenter.Presenter;
 
-public class View {
+public class View implements IView {
 
     private JFrame frame = new JFrame("Ice-Cream");
     private Presenter presenter;
     private DefaultListModel<String> listValues_auswertung = new DefaultListModel<>();
     private DefaultListModel<String> listValues_admin = new DefaultListModel<>();
-    private JList<String> stationen_list_auswertung = new JList(listValues_auswertung);
-    private JList<String> station_list_admin = new JList(listValues_admin);
+    private JList<String> stationen_list_auswertung = new JList<String>(listValues_auswertung);
+    private JList<String> station_list_admin = new JList<String>(listValues_admin);
     private String target = null;
     private JTextField target_value;
 
@@ -58,7 +60,7 @@ public class View {
         adminPortal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                station_list_admin = new JList(listValues_admin);
+                station_list_admin = new JList<String>(listValues_admin);
                 getPresenter().prepareDataForList(listValues_admin);
                 getPresenter().loadView(panelCont, cl, "adminP");
             }
@@ -71,10 +73,11 @@ public class View {
         auswertungPortal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                stationen_list_auswertung = new JList(listValues_auswertung);
+                stationen_list_auswertung = new JList<String>(listValues_auswertung);
                 getPresenter().prepareDataForList(listValues_auswertung);
                 getPresenter().loadView(panelCont, cl, "auswertungP");
-                getPresenter().loadDefaultTargetValue(target_value);
+                getPresenter().loadTargetValue(target_value);
+                getPresenter().addStationRandomly(listValues_auswertung);
             }
         });
 
@@ -120,7 +123,7 @@ public class View {
      * @param backButtonAdmin 
      * 
      */
-    private void buildAdminView(JPanel adminView, JPanel panelCont, JButton backButtonAdmin) {
+    public void buildAdminView(JPanel adminView, JPanel panelCont, JButton backButtonAdmin) {
         adminView.setLayout(null);
         backButtonAdmin.setBounds(17, 325, 113, 24);
         adminView.add(backButtonAdmin);
@@ -193,7 +196,7 @@ public class View {
      * @param stationen_list 
      * 
      */
-    private void buildMainView(JPanel mainView, JPanel panelCont, JButton goToAdminView) {
+    public void buildMainView(JPanel mainView, JPanel panelCont, JButton goToAdminView) {
 
         JTextField stationId_value;
         mainView.setBackground(Color.WHITE);
@@ -248,9 +251,7 @@ public class View {
         varianz_label.setBounds(166, 141, 56, 16);
         mainView.add(varianz_label);
 
-        JTextField datum_value;
-        datum_value = new JTextField();
-        datum_value.setColumns(10);
+        JDateChooser datum_value = new JDateChooser();
         datum_value.setBounds(262, 54, 157, 22);
         mainView.add(datum_value);
 
@@ -278,11 +279,27 @@ public class View {
         varianz_value = new JTextField();
         varianz_value.setColumns(10);
         varianz_value.setBounds(262, 138, 157, 22);
+        varianz_value.setEditable(false);
         mainView.add(varianz_value);
 
         JButton calculateVarianz = new JButton("Varianz berechnen");
         calculateVarianz.setBounds(262, 173, 157, 23);
         mainView.add(calculateVarianz);
+
+        JCheckBox showDiagram = new JCheckBox("Diagramm anzeigen");
+        showDiagram.setBounds(262, 215, 157, 23);
+        mainView.add(showDiagram);
+
+        showDiagram.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (showDiagram.isSelected()) {
+                    getPresenter().createVarianceDiagramm(mainView, aktuellWert_value, varianz_value, target_value);
+                }
+
+            }
+        });
+
 
         calculateVarianz.addActionListener(new ActionListener() {
             @Override
@@ -291,13 +308,9 @@ public class View {
             }
         });
 
-        JCheckBox showDiagram = new JCheckBox("Diagramm anzeigen");
-        showDiagram.setBounds(262, 215, 157, 23);
-        mainView.add(showDiagram);
-
-
-
     }
+
+
 
     public void setPresenter(Presenter pres) {
         presenter = pres;
