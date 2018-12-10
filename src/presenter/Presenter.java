@@ -136,50 +136,100 @@ public class Presenter implements IPresenter {
         }
     }
 
-    public void prepareDataForList(DefaultListModel<String> listValues) {
+    public void prepareDataForList(DefaultListModel<String> listValues, JTextField varianz_value, JDateChooser datum_value) {
         if (listValues != null) {
             listValues.clear();
         }
         String[] stationen = laodStationenForList();
         for (int i = 0; i < stationen.length; i++) {
-            listValues.addElement(stationen[i]);
+            String[] parts = stationen[i].split(" ");
+            String station = parts[0];
+            if (!station.equals("")) {
+                listValues.addElement(station);
+            }
         }
 
     }
 
-    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value) {
-
+    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value, JTextField varianz_value) {
+        ArrayList<String> lines = new ArrayList<String>();
+        String line = null;
         targetAnsetzen_value.setText("");
         list = (JList)evt.getSource();
         if (evt.getClickCount() == 1) {
             String selected = list.getSelectedValue();
-            stationId_value.setText(selected);
+            File file = null;
+            try {
+                file = loadFileData();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if (file != null) {
+                String[] parts = null;
+                try {
+                    FileReader fr = new FileReader(file);
+                    BufferedReader br = new BufferedReader(fr);
+                    while ((line = br.readLine()) != null) {
+                        lines.add(line);
+                    }
+                    fr.close();
+                    br.close();
+
+                    FileWriter fw = new FileWriter(file);
+                    BufferedWriter out = new BufferedWriter(fw);
+                    for (String s : lines) {
+                        out.newLine();
+                        out.write(s);
+                        if (s.contains(stationId_value.getText())) {
+                            parts = s.split(" ");;
+                        }
+                    }
+                    out.flush();
+                    out.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (0 >= parts.length) {
+                    //index not exists
+                } else {
+                    stationId_value.setText(parts[0]);
+                }
+                if (1 >= parts.length) {
+                    //index not exists
+                } else {
+                    varianz_value.setText(parts[1]);
+                }
+            }
         }
 
     }
 
     public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue) {
-        int target = Integer.parseInt(targetValue);
         JOptionPane messagePane = new JOptionPane();
-        if (target > 100) {
-            messagePane.showMessageDialog(null, "Bitte ein Wert zwischen 0 und 100 eingeben", null, JOptionPane.ERROR_MESSAGE);
-        } else {
-            try {
-                File file = loadFileData();
-                updateFile(file, targetValue, ausgewhlteStation_value);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (!ausgewhlteStation_value.getText().isEmpty()) {
+            int target = Integer.parseInt(targetValue);
+            if (target > 100) {
+                messagePane.showMessageDialog(null, "Bitte ein Wert zwischen 0 und 100 eingeben", null, JOptionPane.ERROR_MESSAGE);
+            } else {
+                try {
+                    File file = loadFileData();
+                    updateFile(file, targetValue, ausgewhlteStation_value);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                messagePane.showMessageDialog(null, "Target wurde gespeichert", null, JOptionPane.INFORMATION_MESSAGE);
             }
-            messagePane.showMessageDialog(null, "Target wurde gespeichert", null, JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            messagePane.showMessageDialog(null, "Bitte eine Station selektieren", null, JOptionPane.ERROR_MESSAGE);
         }
-
     }
 
     public void loadTargetValue(JTextField target_value) {
         target_value.setText("42");
     }
 
-    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value) {
+    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value) {
         JOptionPane message = new JOptionPane();
         if (!aktuellWert_value.getText().isEmpty() && !target_value.getText().isEmpty() && !stationId_value.getText().isEmpty()) {
             int aktuellWert = Integer.parseInt(aktuellWert_value.getText());
@@ -195,9 +245,47 @@ public class Presenter implements IPresenter {
             } else {
                 varianz_value.setForeground(Color.BLACK);
             }
+            saveVarianceAndDate(stationId_value.getText(), variance, datum_value);
         } else {
             message.showMessageDialog(null, "Bitte Station auswählen und Aktueller Wert eingeben", null, JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void saveVarianceAndDate(String station, int variance, JDateChooser datum_value) {
+        List<String> lines = new ArrayList<String>();
+        String line = null;
+        File fileModel = null;
+        try {
+            fileModel = loadFileData();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if (fileModel != null) {
+            try {
+                FileReader fr = new FileReader(fileModel);
+                BufferedReader br = new BufferedReader(fr);
+                while ((line = br.readLine()) != null) {
+                    if (line.contains(station))
+                        line = line.replace(station, station + " " + variance + " " + ((JTextField)datum_value.getDateEditor().getUiComponent()).getText());
+                    lines.add(line);
+                }
+                fr.close();
+                br.close();
+
+                FileWriter fw = new FileWriter(fileModel);
+                BufferedWriter out = new BufferedWriter(fw);
+                for (String s : lines) {
+                    out.newLine();
+                    out.write(s);
+                }
+                out.flush();
+                out.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
     }
 
     public void setValueForDiagram(DefaultCategoryDataset valueDiagram, String varianz_value, String aktuellWert, String target) {
@@ -404,14 +492,54 @@ public class Presenter implements IPresenter {
     }
 
     public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value, JTextField varianz_value) {
-
-        aktuellWert_value.setText("");
-        datum_value.setDate(null);;
-        varianz_value.setText("");
+        ArrayList<String> lines = new ArrayList<String>();
+        String line = null;
         list = (JList)evt.getSource();
         if (evt.getClickCount() == 1) {
             String selected = list.getSelectedValue();
-            stationId_value.setText(selected);
+            File file = null;
+            try {
+                file = loadFileData();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            if (file != null) {
+                String[] parts = null;
+                try {
+                    FileReader fr = new FileReader(file);
+                    BufferedReader br = new BufferedReader(fr);
+                    while ((line = br.readLine()) != null) {
+                        lines.add(line);
+                    }
+                    fr.close();
+                    br.close();
+
+                    FileWriter fw = new FileWriter(file);
+                    BufferedWriter out = new BufferedWriter(fw);
+                    for (String s : lines) {
+                        out.newLine();
+                        out.write(s);
+                        if (s.contains(selected)) {
+                            parts = s.split(" ");;
+                        }
+                    }
+                    out.flush();
+                    out.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (0 >= parts.length) {
+                    //index not exists
+                } else {
+                    stationId_value.setText(parts[0]);
+                }
+                if (1 >= parts.length) {
+                    //index not exists
+                } else {
+                    varianz_value.setText(parts[1]);
+                }
+            }
         }
 
     }

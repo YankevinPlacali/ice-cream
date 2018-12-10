@@ -17,6 +17,8 @@ import javax.swing.JTextField;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import com.toedter.calendar.JDateChooser;
+
 /**
  * @author kevin.tchagwo
  *
@@ -33,15 +35,15 @@ public interface IPresenter {
 
     public void setNumberRestriction(KeyEvent wert);
 
-    public void prepareDataForList(DefaultListModel<String> listValues);
+    public void prepareDataForList(DefaultListModel<String> listValues, JTextField varianz_value, JDateChooser datum_value);
 
-    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value);
+    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value, JTextField varianz_value);
 
     public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue);
 
     public void loadTargetValue(JTextField target_value);
 
-    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value);
+    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value);
 
     public void setValueForDiagram(DefaultCategoryDataset valueDiagram, String varianz_value, String aktuellWert, String target);
 
