@@ -39,11 +39,12 @@ public interface IPresenter {
 
     public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value, JTextField varianz_value);
 
-    public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue);
+    public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue, JLabel announcementTargetUser);
 
     public void loadTargetValue(JTextField target_value);
 
-    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value);
+    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value,
+            JLabel announcementVarianceAdmin);
 
     public void setValueForDiagram(DefaultCategoryDataset valueDiagram, String varianz_value, String aktuellWert, String target);
 

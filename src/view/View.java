@@ -37,8 +37,11 @@ public class View implements IView {
     private JTextField target_value;
     private JLabel announcementMain = new JLabel();
     private JLabel announcementAdmin = new JLabel();
+    private JLabel announcementVarianceAdmin = new JLabel();
+    private JLabel announcementTargetUser = new JLabel();
     private JTextField varianz_value = new JTextField();
     private JDateChooser datum_value = new JDateChooser();
+    JTextField targetAnsetzen_value = new JTextField();
 
     /**
      * Create the application.
@@ -150,6 +153,8 @@ public class View implements IView {
         adminView.add(scroll);
         announcementAdmin.setBounds(10, 250, 300, 50);
         adminView.add(announcementAdmin);
+        announcementVarianceAdmin.setBounds(10, 270, 500, 70);
+        adminView.add(announcementVarianceAdmin);
 
 
         JLabel ausgewhlteStation_label = new JLabel("Ausgew\u00E4hlte Station:");
@@ -160,8 +165,7 @@ public class View implements IView {
         targetAnsetzen_label.setBounds(140, 70, 97, 25);
         adminView.add(targetAnsetzen_label);
 
-        JTextField targetAnsetzen_value;
-        targetAnsetzen_value = new JTextField();
+
         targetAnsetzen_value.setColumns(10);
         targetAnsetzen_value.setBounds(283, 71, 157, 22);
         targetAnsetzen_value.addKeyListener(new KeyAdapter() {
@@ -179,7 +183,7 @@ public class View implements IView {
         validateTaget.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                getPresenter().setTargetValue(ausgewhlteStation_value, targetAnsetzen_value.getText());
+                getPresenter().setTargetValue(ausgewhlteStation_value, targetAnsetzen_value.getText(), announcementTargetUser);
             }
         });
 
@@ -233,6 +237,8 @@ public class View implements IView {
         stationen_list_auswertung.setBounds(10, 27, 114, 232);
         announcementMain.setBounds(10, 250, 300, 50);
         mainView.add(announcementMain);
+        announcementTargetUser.setBounds(10, 270, 500, 70);
+        mainView.add(announcementTargetUser);
 
         JScrollPane scroll = new JScrollPane(stationen_list_auswertung);
         scroll.setBounds(10, 27, 114, 232);
@@ -299,8 +305,8 @@ public class View implements IView {
 
         stationen_list_auswertung.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-                getPresenter().resetFieldValues(aktuellWert_value, varianz_value, datum_value);
-                getPresenter().getSelectedValueMainFromList(stationen_list_auswertung, stationId_value, evt, aktuellWert_value, datum_value, varianz_value);
+                getPresenter().resetFieldValues(aktuellWert_value, varianz_value, datum_value, showDiagram);
+                getPresenter().getSelectedValueMainFromList(stationen_list_auswertung, stationId_value, evt, aktuellWert_value, datum_value, varianz_value, target_value);
             }
 
         });
@@ -319,7 +325,7 @@ public class View implements IView {
         calculateVarianz.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                getPresenter().calculateVariance(aktuellWert_value, target_value, varianz_value, stationId_value, datum_value);
+                getPresenter().calculateVariance(aktuellWert_value, target_value, varianz_value, stationId_value, datum_value, announcementVarianceAdmin);
             }
         });
 

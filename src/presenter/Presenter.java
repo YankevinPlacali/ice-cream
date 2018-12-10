@@ -17,6 +17,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -143,9 +144,13 @@ public class Presenter implements IPresenter {
         String[] stationen = laodStationenForList();
         for (int i = 0; i < stationen.length; i++) {
             String[] parts = stationen[i].split(" ");
-            String station = parts[0];
-            if (!station.equals("")) {
-                listValues.addElement(station);
+            if (1 >= parts.length) {
+                //index not exists
+            } else {
+                String station = parts[1];
+                if (!station.equals("")) {
+                    listValues.addElement(station);
+                }
             }
         }
 
@@ -181,7 +186,7 @@ public class Presenter implements IPresenter {
                     for (String s : lines) {
                         out.newLine();
                         out.write(s);
-                        if (s.contains(stationId_value.getText())) {
+                        if (s.contains(selected)) {
                             parts = s.split(" ");;
                         }
                     }
@@ -193,19 +198,19 @@ public class Presenter implements IPresenter {
                 if (0 >= parts.length) {
                     //index not exists
                 } else {
-                    stationId_value.setText(parts[0]);
+                    targetAnsetzen_value.setText(parts[0]);
                 }
                 if (1 >= parts.length) {
                     //index not exists
                 } else {
-                    varianz_value.setText(parts[1]);
+                    stationId_value.setText(parts[1]);
                 }
             }
         }
 
     }
 
-    public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue) {
+    public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue, JLabel announcementTargetUser) {
         JOptionPane messagePane = new JOptionPane();
         if (!ausgewhlteStation_value.getText().isEmpty()) {
             int target = Integer.parseInt(targetValue);
@@ -214,22 +219,54 @@ public class Presenter implements IPresenter {
             } else {
                 try {
                     File file = loadFileData();
-                    updateFile(file, targetValue, ausgewhlteStation_value);
+                    saveTarget(file, targetValue, ausgewhlteStation_value);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 messagePane.showMessageDialog(null, "Target wurde gespeichert", null, JOptionPane.INFORMATION_MESSAGE);
+                announcementTargetUser.setText("Eine neue Target wurde eingesetzt: " + ausgewhlteStation_value.getText() + " = " + target);
+                announcementTargetUser.setForeground(Color.GREEN);
             }
         } else {
             messagePane.showMessageDialog(null, "Bitte eine Station selektieren", null, JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    private void saveTarget(File file, String targetValue, JTextField ausgewhlteStation_value) {
+        List<String> lines = new ArrayList<String>();
+        String line = null;
+        try {
+            FileReader fr = new FileReader(file);
+            BufferedReader br = new BufferedReader(fr);
+            while ((line = br.readLine()) != null) {
+                if (line.contains(ausgewhlteStation_value.getText())) {
+                    line = targetValue + " " + ausgewhlteStation_value.getText();
+                }
+                lines.add(line);
+            }
+            fr.close();
+            br.close();
+
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter out = new BufferedWriter(fw);
+            for (String s : lines) {
+                out.newLine();
+                out.write(s);
+            }
+            out.flush();
+            out.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
     public void loadTargetValue(JTextField target_value) {
         target_value.setText("42");
     }
 
-    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value) {
+    public void calculateVariance(JTextField aktuellWert_value, JTextField target_value, JTextField varianz_value, JTextField stationId_value, JDateChooser datum_value,
+            JLabel announcementVarianceAdmin) {
         JOptionPane message = new JOptionPane();
         if (!aktuellWert_value.getText().isEmpty() && !target_value.getText().isEmpty() && !stationId_value.getText().isEmpty()) {
             int aktuellWert = Integer.parseInt(aktuellWert_value.getText());
@@ -246,6 +283,8 @@ public class Presenter implements IPresenter {
                 varianz_value.setForeground(Color.BLACK);
             }
             saveVarianceAndDate(stationId_value.getText(), variance, datum_value, aktuellWert);
+            announcementVarianceAdmin.setText("Die Varianz für folgende Station wurde berechnet:" + stationId_value.getText() + ":" + variance);
+            announcementVarianceAdmin.setForeground(Color.GREEN);
         } else {
             message.showMessageDialog(null, "Bitte Station auswählen und Aktueller Wert eingeben", null, JOptionPane.ERROR_MESSAGE);
         }
@@ -336,8 +375,10 @@ public class Presenter implements IPresenter {
                 Random randomno = new Random();
                 if ((randomno.nextInt() * randomno.nextInt()) % 2 == 0) {
                     if (!listValues_auswertung.contains(randomStationen[rnd])) {
-                        listValues_auswertung.addElement(randomStationen[rnd]);
-                        annoucement.setText("Eine neue Station wurde hinzugefügt: " + randomStationen[rnd]);
+                        String value = randomStationen[rnd];
+                        String[] parts = value.split(" ");
+                        listValues_auswertung.addElement(parts[1]);
+                        annoucement.setText("Eine neue Station wurde hinzugefügt: " + parts[1]);
                         annoucement.setForeground(Color.BLUE);
                         updateFileModel(randomStationen[rnd]);
                     }
@@ -491,7 +532,8 @@ public class Presenter implements IPresenter {
         }
     }
 
-    public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value, JTextField varianz_value) {
+    public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value, JTextField varianz_value,
+            JTextField target_value) {
         ArrayList<String> lines = new ArrayList<String>();
         String line = null;
         list = (JList)evt.getSource();
@@ -532,27 +574,34 @@ public class Presenter implements IPresenter {
                 if (0 >= parts.length) {
                     //index not exists
                 } else {
-                    stationId_value.setText(parts[0]);
+                    //hier kommt target
+                    target_value.setText(parts[0]);
                 }
                 if (1 >= parts.length) {
                     //index not exists
                 } else {
-                    varianz_value.setText(parts[1]);
+                    stationId_value.setText(parts[1]);
                 }
                 if (2 >= parts.length) {
                     //index not exists
                 } else {
-                    aktuellWert_value.setText(parts[2]);
+                    varianz_value.setText(parts[2]);
+                }
+                if (3 >= parts.length) {
+                    //index not exists
+                } else {
+                    aktuellWert_value.setText(parts[3]);
                 }
             }
         }
 
     }
 
-    public void resetFieldValues(JTextField aktuellWert_value, JTextField varianz_value, JDateChooser datum_value) {
+    public void resetFieldValues(JTextField aktuellWert_value, JTextField varianz_value, JDateChooser datum_value, JCheckBox showDiagram) {
         varianz_value.setText("");
         datum_value.setDate(null);
         aktuellWert_value.setText("");
+        showDiagram.setSelected(false);
     }
 
 }
