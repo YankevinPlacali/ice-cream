@@ -245,13 +245,13 @@ public class Presenter implements IPresenter {
             } else {
                 varianz_value.setForeground(Color.BLACK);
             }
-            saveVarianceAndDate(stationId_value.getText(), variance, datum_value);
+            saveVarianceAndDate(stationId_value.getText(), variance, datum_value, aktuellWert);
         } else {
             message.showMessageDialog(null, "Bitte Station auswählen und Aktueller Wert eingeben", null, JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void saveVarianceAndDate(String station, int variance, JDateChooser datum_value) {
+    private void saveVarianceAndDate(String station, int variance, JDateChooser datum_value, int aktuellWert) {
         List<String> lines = new ArrayList<String>();
         String line = null;
         File fileModel = null;
@@ -267,7 +267,7 @@ public class Presenter implements IPresenter {
                 BufferedReader br = new BufferedReader(fr);
                 while ((line = br.readLine()) != null) {
                     if (line.contains(station))
-                        line = line.replace(station, station + " " + variance + " " + ((JTextField)datum_value.getDateEditor().getUiComponent()).getText());
+                        line = line.replace(station, station + " " + variance + " " + aktuellWert + " " + ((JTextField)datum_value.getDateEditor().getUiComponent()).getText());
                     lines.add(line);
                 }
                 fr.close();
@@ -539,9 +539,20 @@ public class Presenter implements IPresenter {
                 } else {
                     varianz_value.setText(parts[1]);
                 }
+                if (2 >= parts.length) {
+                    //index not exists
+                } else {
+                    aktuellWert_value.setText(parts[2]);
+                }
             }
         }
 
+    }
+
+    public void resetFieldValues(JTextField aktuellWert_value, JTextField varianz_value, JDateChooser datum_value) {
+        varianz_value.setText("");
+        datum_value.setDate(null);
+        aktuellWert_value.setText("");
     }
 
 }

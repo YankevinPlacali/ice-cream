@@ -299,10 +299,10 @@ public class View implements IView {
 
         stationen_list_auswertung.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-                varianz_value.setText("");
-                datum_value.setDate(null);
+                getPresenter().resetFieldValues(aktuellWert_value, varianz_value, datum_value);
                 getPresenter().getSelectedValueMainFromList(stationen_list_auswertung, stationId_value, evt, aktuellWert_value, datum_value, varianz_value);
             }
+
         });
 
         showDiagram.addActionListener(new ActionListener() {
