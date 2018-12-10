@@ -5,8 +5,10 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +137,9 @@ public class Presenter implements IPresenter {
     }
 
     public void prepareDataForList(DefaultListModel<String> listValues) {
+        if (listValues != null) {
+            listValues.clear();
+        }
         String[] stationen = laodStationenForList();
         for (int i = 0; i < stationen.length; i++) {
             listValues.addElement(stationen[i]);
@@ -246,6 +251,7 @@ public class Presenter implements IPresenter {
                         listValues_auswertung.addElement(randomStationen[rnd]);
                         annoucement.setText("Eine neue Station wurde hinzugefügt: " + randomStationen[rnd]);
                         annoucement.setForeground(Color.BLUE);
+                        updateFileModel(randomStationen[rnd]);
                     }
                 } else {
                     //do nothing
@@ -260,6 +266,48 @@ public class Presenter implements IPresenter {
 
         // schedules the task to be run in an interval 
         timer.scheduleAtFixedRate(task, delay, intevalPeriod);
+
+    }
+
+    private void updateFileModel(String newStation) {
+        File modelFile = null;
+        try {
+            modelFile = loadFileData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (modelFile != null) {
+            updateDataInModel(modelFile, newStation);
+        }
+
+    }
+
+    private void updateDataInModel(File modelFile, String newStation) {
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter(modelFile, true));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (bw != null) {
+            try {
+                // APPEND MODE SET HERE
+                bw = new BufferedWriter(new FileWriter(modelFile, true));
+                bw.newLine();
+                bw.write(newStation);
+                bw.flush();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            } finally { // always close the file
+                if (bw != null)
+                    try {
+                        bw.close();
+                    } catch (IOException ioe2) {
+                        // just ignore it
+                    }
+            }
+
+        }
 
     }
 
