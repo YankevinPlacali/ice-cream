@@ -26,6 +26,8 @@ import presenter.Presenter;
 public class View implements IView {
 
     private JFrame frame = new JFrame("Ice-Cream");
+    private JFrame frame2 = new JFrame("Ice-Cream2");
+    private JFrame frame3 = new JFrame("Ice-Cream3");
     private Presenter presenter;
     private DefaultListModel<String> listValues_auswertung = new DefaultListModel<>();
     private DefaultListModel<String> listValues_admin = new DefaultListModel<>();
@@ -80,6 +82,7 @@ public class View implements IView {
             public void actionPerformed(ActionEvent e) {
                 stationen_list_auswertung = new JList<String>(listValues_auswertung);
                 getPresenter().prepareDataForList(listValues_auswertung, varianz_value, datum_value);
+                getPresenter().loadView(panelCont, cl, "auswertungP");
                 getPresenter().loadView(panelCont, cl, "auswertungP");
                 getPresenter().loadTargetValue(target_value);
                 getPresenter().addStationRandomly(listValues_auswertung, announcementMain);
