@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -46,7 +47,7 @@ public interface IPresenter {
 
     public void createVarianceDiagramm(JPanel mainView, JTextField aktuellWert_value, JTextField varianz_value, JTextField target_value);
 
-    public void addStationRandomly(DefaultListModel<String> listValues_auswertung);
+    public void addStationRandomly(DefaultListModel<String> listValues_auswertung, JLabel annoucement);
 
     public String[] loadRandomStationen(File randomFile);
 }

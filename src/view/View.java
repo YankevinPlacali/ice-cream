@@ -33,6 +33,7 @@ public class View implements IView {
     private JList<String> station_list_admin = new JList<String>(listValues_admin);
     private String target = null;
     private JTextField target_value;
+    private JLabel annoucement = new JLabel();
 
     /**
      * Create the application.
@@ -77,7 +78,7 @@ public class View implements IView {
                 getPresenter().prepareDataForList(listValues_auswertung);
                 getPresenter().loadView(panelCont, cl, "auswertungP");
                 getPresenter().loadTargetValue(target_value);
-                getPresenter().addStationRandomly(listValues_auswertung);
+                getPresenter().addStationRandomly(listValues_auswertung, annoucement);
             }
         });
 
@@ -192,6 +193,7 @@ public class View implements IView {
      * @param mainView 
      * @param panelCont 
      * @param goToAdminView 
+     * @param annoucement2 
      * @param targetValue 
      * @param stationen_list 
      * 
@@ -220,6 +222,8 @@ public class View implements IView {
         mainView.add(stationId_value);
 
         stationen_list_auswertung.setBounds(10, 27, 114, 232);
+        annoucement.setBounds(10, 250, 300, 50);
+        mainView.add(annoucement);
 
         JScrollPane scroll = new JScrollPane(stationen_list_auswertung);
         scroll.setBounds(10, 27, 114, 232);

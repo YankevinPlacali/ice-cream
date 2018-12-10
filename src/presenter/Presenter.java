@@ -15,6 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -207,21 +208,26 @@ public class Presenter implements IPresenter {
      * @param target_value 
      */
     public void createVarianceDiagramm(JPanel mainView, JTextField aktuellWert_value, JTextField varianz_value, JTextField target_value) {
-        String categoryAxisLabel = "Target";
-        String valueAxisLabel = "Aktueller Wert";
-        DefaultCategoryDataset valueDiagram = new DefaultCategoryDataset();
-        setValueForDiagram(valueDiagram, varianz_value.getText(), aktuellWert_value.getText(), target_value.getText());
-        JFreeChart diagramm = ChartFactory.createLineChart("Varianz Diagramm", categoryAxisLabel, valueAxisLabel, valueDiagram);
-        CategoryPlot plot = diagramm.getCategoryPlot();
-        plot.setRangeGridlinePaint(Color.BLACK);
-        ChartFrame chartFrm = new ChartFrame("Varianz Diagramm", diagramm);
-        chartFrm.setVisible(true);
-        chartFrm.setSize(500, 500);
-        ChartPanel panelDiag = new ChartPanel(diagramm);
-        mainView.add(panelDiag);
+        if (!(varianz_value.getText().isEmpty())) {
+            String categoryAxisLabel = "Target";
+            String valueAxisLabel = "Aktueller Wert";
+            DefaultCategoryDataset valueDiagram = new DefaultCategoryDataset();
+            setValueForDiagram(valueDiagram, varianz_value.getText(), aktuellWert_value.getText(), target_value.getText());
+            JFreeChart diagramm = ChartFactory.createLineChart("Varianz Diagramm", categoryAxisLabel, valueAxisLabel, valueDiagram);
+            CategoryPlot plot = diagramm.getCategoryPlot();
+            plot.setRangeGridlinePaint(Color.BLACK);
+            ChartFrame chartFrm = new ChartFrame("Varianz Diagramm", diagramm);
+            chartFrm.setVisible(true);
+            chartFrm.setSize(500, 500);
+            ChartPanel panelDiag = new ChartPanel(diagramm);
+            mainView.add(panelDiag);
+        } else {
+            JOptionPane message = new JOptionPane();
+            message.showMessageDialog(null, "Bitte Varianz berechnen", null, JOptionPane.ERROR_MESSAGE);
+        }
     }
 
-    public void addStationRandomly(DefaultListModel<String> listValues_auswertung) {
+    public void addStationRandomly(DefaultListModel<String> listValues_auswertung, JLabel annoucement) {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -238,11 +244,12 @@ public class Presenter implements IPresenter {
                 if ((randomno.nextInt() * randomno.nextInt()) % 2 == 0) {
                     if (!listValues_auswertung.contains(randomStationen[rnd])) {
                         listValues_auswertung.addElement(randomStationen[rnd]);
+                        annoucement.setText("Eine neue Station wurde hinzugefügt: " + randomStationen[rnd]);
+                        annoucement.setForeground(Color.BLUE);
                     }
                 } else {
-
+                    //do nothing
                 }
-                System.out.println("Hello !!!");
             }
 
         };
@@ -334,13 +341,13 @@ public class Presenter implements IPresenter {
                     ex.printStackTrace();
                 }
             }
-            
+
             //            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             //            for(String)
             //            writer.write(str);
             //             
             //            writer.close();
-            
+
             stationen = dataStationen.toArray(new String[dataStationen.size()]);
         } else {
             System.out.println("failed to start with the file - the file is null");
@@ -348,8 +355,7 @@ public class Presenter implements IPresenter {
         }
     }
 
-    public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value,
-            JTextField varianz_value) {
+    public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value, JTextField varianz_value) {
 
         aktuellWert_value.setText("");
         datum_value.setDate(null);;
