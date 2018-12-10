@@ -34,7 +34,7 @@ public interface IPresenter {
 
     public void prepareDataForList(DefaultListModel<String> listValues);
 
-    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt);
+    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value);
 
     public void setTargetValue(JTextField ausgewhlteStation_value, String targetValue);
 

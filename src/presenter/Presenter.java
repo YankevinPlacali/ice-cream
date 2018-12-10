@@ -27,6 +27,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 
+import com.toedter.calendar.JDateChooser;
+
 import model.Model;
 import view.View;
 
@@ -139,8 +141,9 @@ public class Presenter implements IPresenter {
 
     }
 
-    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt) {
+    public void getSelectedValueFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField targetAnsetzen_value) {
 
+        targetAnsetzen_value.setText("");
         list = (JList)evt.getSource();
         if (evt.getClickCount() == 1) {
             String selected = list.getSelectedValue();
@@ -343,6 +346,20 @@ public class Presenter implements IPresenter {
             System.out.println("failed to start with the file - the file is null");
             return;
         }
+    }
+
+    public void getSelectedValueMainFromList(JList<String> list, JTextField stationId_value, MouseEvent evt, JTextField aktuellWert_value, JDateChooser datum_value,
+            JTextField varianz_value) {
+
+        aktuellWert_value.setText("");
+        datum_value.setDate(null);;
+        varianz_value.setText("");
+        list = (JList)evt.getSource();
+        if (evt.getClickCount() == 1) {
+            String selected = list.getSelectedValue();
+            stationId_value.setText(selected);
+        }
+
     }
 
 }

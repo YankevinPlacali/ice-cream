@@ -175,7 +175,7 @@ public class View implements IView {
 
         station_list_admin.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-                getPresenter().getSelectedValueFromList(station_list_admin, ausgewhlteStation_value, evt);
+                getPresenter().getSelectedValueFromList(station_list_admin, ausgewhlteStation_value, evt, targetAnsetzen_value);
             }
         });
 
@@ -220,12 +220,6 @@ public class View implements IView {
         mainView.add(stationId_value);
 
         stationen_list_auswertung.setBounds(10, 27, 114, 232);
-
-        stationen_list_auswertung.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                getPresenter().getSelectedValueFromList(stationen_list_auswertung, stationId_value, evt);
-            }
-        });
 
         JScrollPane scroll = new JScrollPane(stationen_list_auswertung);
         scroll.setBounds(10, 27, 114, 232);
@@ -289,6 +283,12 @@ public class View implements IView {
         JCheckBox showDiagram = new JCheckBox("Diagramm anzeigen");
         showDiagram.setBounds(262, 215, 157, 23);
         mainView.add(showDiagram);
+
+        stationen_list_auswertung.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                getPresenter().getSelectedValueMainFromList(stationen_list_auswertung, stationId_value, evt, aktuellWert_value, datum_value, varianz_value);
+            }
+        });
 
         showDiagram.addActionListener(new ActionListener() {
             @Override
